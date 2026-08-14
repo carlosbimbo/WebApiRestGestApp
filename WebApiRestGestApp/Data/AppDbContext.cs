@@ -10,15 +10,21 @@ namespace WebApiRestGestApp.Data
         }
 
         public DbSet<User> Users { get; set; }
+        // Agregamos la nueva tabla al contexto
+        public DbSet<RegistroEvento> RegistroEventos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configurar el índice único para username
+            // Configuración para Users (Mantenemos lo que ya tenías)
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            // Configuración Exclusiva para Eventos (Llave Compuesta)
+            modelBuilder.Entity<RegistroEvento>()
+                .HasKey(e => new { e.IdEven, e.IdUser });
         }
     }
 }

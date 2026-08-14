@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Inyección de dependencias (IoC)
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>)); // Dinámico para todas las tablas
 builder.Services.AddScoped<IUserService, UserService>(); // Específico para lógica de Usuarios
+builder.Services.AddScoped<IRegistroEventoService, RegistroEventoService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

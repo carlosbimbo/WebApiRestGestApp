@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Data;
@@ -22,9 +21,9 @@ namespace WebApiRestGestApp.Repositories
             return await _dbSet.ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
+        public async Task<T?> GetByIdAsync(params object[] keyValues)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.FindAsync(keyValues); // Entity Framework soporta object[] nativamente
         }
 
         public async Task<T> AddAsync(T entity)
@@ -40,9 +39,9 @@ namespace WebApiRestGestApp.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(params object[] keyValues)
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity = await _dbSet.FindAsync(keyValues);
             if (entity != null)
             {
                 _dbSet.Remove(entity);
