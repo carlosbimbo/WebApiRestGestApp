@@ -18,7 +18,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRegistroEventoService, RegistroEventoService>();
-builder.Services.AddScoped<IAuthService, AuthService>(); // <-- REGISTRAR EL NUEVO SERVICIO
+builder.Services.AddScoped<IAuthService, AuthService>(); 
+builder.Services.AddScoped<IEtapaGestacionalService, EtapaGestacionalService>();
+builder.Services.AddScoped<IRegistroSuplementoService, RegistroSuplementoService>();
+builder.Services.AddScoped<IRegistroHemoglobinaService, RegistroHemoglobinaService>();
+builder.Services.AddScoped<IDiasGestacionService, DiasGestacionService>();
+builder.Services.AddScoped<IAgendaGestacionalService, AgendaGestacionalService>();
 
 // 3. Configurar Autenticación con JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "TuClaveSuperSecretaDeDesarrollo123!";
