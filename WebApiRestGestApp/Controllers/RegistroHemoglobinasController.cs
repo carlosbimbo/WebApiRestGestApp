@@ -8,7 +8,7 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize] // Protegido con JWT
-    [Route("api/[controller]")]
+    [Route("api/cenan2026/registrohemoglobina")]
     [ApiController]
     public class RegistroHemoglobinasController : ControllerBase
     {

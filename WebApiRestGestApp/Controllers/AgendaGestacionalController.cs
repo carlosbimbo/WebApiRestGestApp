@@ -8,7 +8,7 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize] // 100% Protegido con JWT
-    [Route("api/[controller]")]
+    [Route("api/cenan2026/agendagestacional")]
     [ApiController]
     public class AgendaGestacionalController : ControllerBase
     {

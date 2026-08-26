@@ -7,8 +7,8 @@ using WebApiRestGestApp.Services;
 
 namespace WebApiRestGestApp.Controllers
 {
-    [Authorize] // <-- Endpoint 100% Protegido por JWT
-    [Route("api/[controller]")]
+    [Authorize] 
+    [Route("api/cenan2026/etapaestacional")]
     [ApiController]
     public class EtapasGestacionalesController : ControllerBase
     {

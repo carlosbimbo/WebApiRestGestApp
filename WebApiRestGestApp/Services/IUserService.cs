@@ -12,5 +12,7 @@ namespace WebApiRestGestApp.Services
         Task<User> CreateUserAsync(User user);
         Task<bool> UpdateUserAsync(Guid id, User user);
         Task<bool> DeleteUserAsync(Guid id);
+        Task<User> SaveOrUpdateAsync(User user);
+
     }
 }

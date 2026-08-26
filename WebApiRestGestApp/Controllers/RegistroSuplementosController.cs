@@ -7,8 +7,8 @@ using WebApiRestGestApp.Services;
 
 namespace WebApiRestGestApp.Controllers
 {
-    [Authorize] // Endpoint 100% protegido con JWT
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/cenan2026/registrosuplemento")]
     [ApiController]
     public class RegistroSuplementosController : ControllerBase
     {

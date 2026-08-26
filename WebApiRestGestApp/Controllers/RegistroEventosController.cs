@@ -8,7 +8,7 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/cenan2026/eventos")]
     [ApiController]
     public class RegistroEventosController : ControllerBase
     {

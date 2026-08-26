@@ -8,7 +8,7 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/cenan2026/usuario")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -64,6 +64,35 @@ namespace WebApiRestGestApp.Controllers
             if (!deleted) return NotFound(new { message = "Usuario no encontrado para eliminar" });
 
             return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("newuserfirstsign")] 
+        public async Task<IActionResult> SaveOrUpdate([FromBody] User user)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _userService.SaveOrUpdateAsync(user);
+
+                return Ok(new
+                {
+                    message = "SUCCESS",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                // SOLUCIÓN: Extraer el error exacto (InnerException) que nos manda PostgreSQL
+                var exactError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor",
+                    details = exactError
+                });
+            }
         }
     }
 }

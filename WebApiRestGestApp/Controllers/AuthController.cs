@@ -5,7 +5,7 @@ using WebApiRestGestApp.Services;
 
 namespace WebApiRestGestApp.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/cenan2026")] 
     [ApiController]
     public class AuthController : ControllerBase
     {
