@@ -14,8 +14,7 @@ namespace WebApiRestGestApp.Services
         {
             _context = context;
         }
-
-        // Búsqueda por Username (El que ya tenías)
+                
         public async Task<object?> GetAllDataUserAsync(string username)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
@@ -23,8 +22,7 @@ namespace WebApiRestGestApp.Services
 
             return await BuildUserDataResponseAsync(user);
         }
-
-        // NUEVO MÉTODO: Búsqueda por Email
+                
         public async Task<object?> GetAllDataUserByEmailAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -32,8 +30,7 @@ namespace WebApiRestGestApp.Services
 
             return await BuildUserDataResponseAsync(user);
         }
-
-        // MÉTODO AUXILIAR: Construye el JSON idéntico para que no dupliques código
+                
         private async Task<object> BuildUserDataResponseAsync(Models.User user)
         {
             var userId = user.Id;
@@ -88,6 +85,30 @@ namespace WebApiRestGestApp.Services
                     }
                 }
             };
+        }
+
+        
+        public async Task<object?> GetFotosPorUsuarioAsync(string username)
+        {
+            // 1. Buscamos al usuario por su username
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+            // Si el usuario no existe, retornamos null para que el controlador lance el error
+            if (user == null) return null;
+
+            // 2. Buscamos en la tabla de suplementos usando el Id del usuario encontrado
+            var fotosList = await _context.RegistroSuplementos
+                .Where(s => s.IdUser == user.Id && !string.IsNullOrEmpty(s.Foto))
+                .Select(s => new
+                {
+                    foto = s.Foto,
+                    // Concatenamos la ruta base con el nombre de la foto
+                    url = $"https://www.macrocorpsystem.com/cenan2025/fotoscapture/{s.Foto}"
+                })
+                .ToListAsync();
+
+            // 3. Retornamos el objeto encapsulado en la propiedad "fotos"
+            return new { fotos = fotosList };
         }
     }
 }

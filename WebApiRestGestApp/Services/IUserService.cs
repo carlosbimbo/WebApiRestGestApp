@@ -13,6 +13,6 @@ namespace WebApiRestGestApp.Services
         Task<bool> UpdateUserAsync(Guid id, User user);
         Task<bool> DeleteUserAsync(Guid id);
         Task<User> SaveOrUpdateAsync(User user);
-
+        Task<User?> UpdateExpoTokenAsync(Guid userId, string expoPushToken);
     }
 }

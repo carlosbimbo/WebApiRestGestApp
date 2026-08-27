@@ -6,5 +6,8 @@ namespace WebApiRestGestApp.Services
     {
         Task<object?> GetAllDataUserAsync(string username);
         Task<object?> GetAllDataUserByEmailAsync(string email);
+
+        // NUEVO MÉTODO: Obtener fotos por username
+        Task<object?> GetFotosPorUsuarioAsync(string username);
     }
 }

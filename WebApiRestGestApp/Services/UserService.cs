@@ -106,5 +106,22 @@ namespace WebApiRestGestApp.Services
                 property.SetValue(existing, newValue);
             }
         }
+
+        // NUEVO MÉTODO IMPLEMENTADO
+        public async Task<User?> UpdateExpoTokenAsync(Guid userId, string expoPushToken)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(userId);
+
+            // Si el usuario no existe, retornamos null
+            if (existingUser == null) return null;
+
+            // Actualizamos únicamente el token y la fecha de actualización
+            existingUser.ExpoPushToken = expoPushToken;
+            existingUser.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateAsync(existingUser);
+
+            return existingUser;
+        }
     }
 }

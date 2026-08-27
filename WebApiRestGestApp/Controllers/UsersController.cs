@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using WebApiRestGestApp.DTOs;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
 
@@ -92,6 +93,49 @@ namespace WebApiRestGestApp.Controllers
                     message = "Error interno del servidor",
                     details = exactError
                 });
+            }
+        }
+        
+        [AllowAnonymous]
+        [HttpPost("api/cenan2026/save-userexpotoken")]
+        public async Task<IActionResult> SaveUserExpoToken([FromBody] SaveExpoTokenRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Faltan datos en la petición" });
+            }
+
+            try
+            {
+                // Validamos manualmente si el string tiene formato UUID correcto
+                if (!Guid.TryParse(request.UserId, out Guid parsedUserId))
+                {                  
+                    return BadRequest(new { error = $"invalid input syntax for type uuid: \"{request.UserId}\"" });
+                }
+                               
+                var updatedUser = await _userService.UpdateExpoTokenAsync(parsedUserId, request.ExpoPushToken);
+                                
+                if (updatedUser == null)
+                {
+                    return NotFound(new { error = "Usuario no encontrado en la base de datos" });
+                }
+                
+                return Ok(new
+                {
+                    message = "Token actualizado",
+                    user = new
+                    {
+                        id = updatedUser.Id,
+                        username = updatedUser.Username,
+                        expopushtoken = updatedUser.ExpoPushToken,
+                        updated_at = updatedUser.UpdatedAt
+                    }
+                });
+            }
+            catch (Exception ex)
+            {                
+                var exactError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return StatusCode(500, new { error = exactError });
             }
         }
     }
