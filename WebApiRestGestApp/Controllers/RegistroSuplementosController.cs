@@ -9,7 +9,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/registrosuplemento")]
+    //[Route("api/cenan2026/registrosuplemento")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class RegistroSuplementosController : ControllerBase
     {
@@ -18,11 +19,7 @@ namespace WebApiRestGestApp.Controllers
         public RegistroSuplementosController(IRegistroSuplementoService suplementoService)
         {
             _suplementoService = suplementoService;
-        }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+        }               
 
         [HttpPost("syncallsuple")]
         public async Task<IActionResult> SaveOrupdSupleSync([FromBody] IEnumerable<RegistroSuplemento> suplementos)
@@ -49,19 +46,16 @@ namespace WebApiRestGestApp.Controllers
                 return StatusCode(500, new { error = "Internal Server Error" });
             }
         }
+       
 
-        // =========================================================
-        // CRUD ESTÁNDAR
-        // =========================================================
-
-        [HttpGet]
+        [HttpGet("getall-suple")]
         public async Task<IActionResult> GetAll()
         {
             var suplementos = await _suplementoService.GetAllAsync();
             return Ok(suplementos);
         }
 
-        [HttpGet("{idSuple}/{idUser}")]
+        [HttpGet("getsuple-byids/{idSuple}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idSuple, Guid idUser)
         {
             var suplemento = await _suplementoService.GetByIdsAsync(idSuple, idUser);
@@ -70,7 +64,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(suplemento);
         }
 
-        [HttpPost]
+        [HttpPost("create-suple")]
         public async Task<IActionResult> Create([FromBody] RegistroSuplemento suplemento)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -79,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idSuple = created.IdSuple, idUser = created.IdUser }, created);
         }
 
-        [HttpPut("{idSuple}/{idUser}")]
+        [HttpPut("updsuple-byids/{idSuple}/{idUser}")]
         public async Task<IActionResult> Update(int idSuple, Guid idUser, [FromBody] RegistroSuplemento suplemento)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -90,7 +84,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{idSuple}/{idUser}")]
+        [HttpDelete("delsuple-byids/{idSuple}/{idUser}")]
         public async Task<IActionResult> Delete(int idSuple, Guid idUser)
         {
             var deleted = await _suplementoService.DeleteAsync(idSuple, idUser);

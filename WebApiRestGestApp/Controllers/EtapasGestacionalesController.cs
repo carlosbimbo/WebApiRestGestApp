@@ -9,7 +9,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/etapaestacional")]
+    //[Route("api/cenan2026/etapaestacional")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class EtapasGestacionalesController : ControllerBase
     {
@@ -19,10 +20,7 @@ namespace WebApiRestGestApp.Controllers
         {
             _etapaService = etapaService;
         }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+                
         [HttpPost("saveorudparragesta")]
         public async Task<IActionResult> SaveOrupdT05etapagestaArray([FromBody] IEnumerable<EtapaGestacional> etapas)
         {
@@ -49,17 +47,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // CRUD ESTÁNDAR
-        // =========================================================
-        [HttpGet]
+        
+        [HttpGet("getall-etapagesta")]
         public async Task<IActionResult> GetAll()
         {
             var etapas = await _etapaService.GetAllAsync();
             return Ok(etapas);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("getetapagesta-byuser/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var etapa = await _etapaService.GetByIdAsync(id);
@@ -68,7 +64,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(etapa);
         }
 
-        [HttpPost]
+        [HttpPost("create-etapagesta")]
         public async Task<IActionResult> Create([FromBody] EtapaGestacional etapa)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -77,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("updetapagesta-byuser/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] EtapaGestacional etapa)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -88,7 +84,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("deletapagesta-byuser/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _etapaService.DeleteAsync(id);

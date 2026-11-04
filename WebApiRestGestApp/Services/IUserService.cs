@@ -14,8 +14,9 @@ namespace WebApiRestGestApp.Services
         Task<bool> DeleteUserAsync(Guid id);
         Task<User> SaveOrUpdateAsync(User user);
         Task<User?> UpdateExpoTokenAsync(Guid userId, string expoPushToken);
-
-        // NUEVO: Método migrado de Node.js para procesamiento masivo
         Task<IEnumerable<User>> SaveOrUpdUserSyncAsync(IEnumerable<User> usersList);
+               
+        Task<User?> UpdateExpoTokenByUsernameAsync(string username, string expoPushToken);
+        Task<User?> FindUserByNameAsync(string username);
     }
 }

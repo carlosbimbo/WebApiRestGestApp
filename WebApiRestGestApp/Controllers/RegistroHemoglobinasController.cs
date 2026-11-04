@@ -9,7 +9,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/registrohemoglobina")]
+    //[Route("api/cenan2026/registrohemoglobina")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class RegistroHemoglobinasController : ControllerBase
     {
@@ -19,10 +20,7 @@ namespace WebApiRestGestApp.Controllers
         {
             _hemoglobinaService = hemoglobinaService;
         }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+               
         [HttpPost("syncallregishemo")]
         public async Task<IActionResult> SaveOrupdRegisHemoSync([FromBody] IEnumerable<RegistroHemoglobina> hemoglobinas)
         {
@@ -49,17 +47,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // CRUD ESTÁNDAR
-        // =========================================================
-        [HttpGet]
+        
+        [HttpGet("getall-regishemo")]
         public async Task<IActionResult> GetAll()
         {
             var hemoglobinas = await _hemoglobinaService.GetAllAsync();
             return Ok(hemoglobinas);
         }
 
-        [HttpGet("{idh}/{idUser}")]
+        [HttpGet("getregishemo-byids/{idh}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idh, Guid idUser)
         {
             var hemoglobina = await _hemoglobinaService.GetByIdsAsync(idh, idUser);
@@ -68,7 +64,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(hemoglobina);
         }
 
-        [HttpPost]
+        [HttpPost("create-regishemo")]
         public async Task<IActionResult> Create([FromBody] RegistroHemoglobina hemoglobina)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -77,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idh = created.Idh, idUser = created.IdUser }, created);
         }
 
-        [HttpPut("{idh}/{idUser}")]
+        [HttpPut("updregishemo-byids/{idh}/{idUser}")]
         public async Task<IActionResult> Update(int idh, Guid idUser, [FromBody] RegistroHemoglobina hemoglobina)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -88,7 +84,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{idh}/{idUser}")]
+        [HttpDelete("delregishemo-byids/{idh}/{idUser}")]
         public async Task<IActionResult> Delete(int idh, Guid idUser)
         {
             var deleted = await _hemoglobinaService.DeleteAsync(idh, idUser);

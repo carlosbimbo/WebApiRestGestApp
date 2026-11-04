@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
@@ -8,20 +9,22 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/valoracionruletamenu")]
+    //[Route("api/cenan2026/valoracionruletamenu")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class ValoracionRuletaMenuController : ControllerBase
     {
         private readonly IValoracionRuletaMenuService _valoracionService;
+        private readonly IWebSocketConnectionManager _wsManager; 
 
-        public ValoracionRuletaMenuController(IValoracionRuletaMenuService valoracionService)
+        public ValoracionRuletaMenuController(
+            IValoracionRuletaMenuService valoracionService,
+            IWebSocketConnectionManager wsManager)
         {
             _valoracionService = valoracionService;
+            _wsManager = wsManager;
         }
-
-        // =========================================================
-        // 1. ENDPOINTS MIGRADOS DE NODE.JS (Mantienen la respuesta JSON original)
-        // =========================================================
+                          
 
         [HttpGet("likesmenu/{idmenu}")]
         public async Task<IActionResult> GetLikesByMenu(int idmenu)
@@ -53,11 +56,18 @@ namespace WebApiRestGestApp.Controllers
                 {
                     return BadRequest(new { error = "Los campos 'iduser' e 'idmenu' son obligatorios" });
                 }
-
+               
                 var totalLikes = await _valoracionService.SaveOrUpdateValoracionAsync(valoracion);
-
-                // NOTA: Para replicar "wss.clients.forEach" (WebSockets) de Node en .NET, 
-                // necesitarás integrar SignalR a futuro.
+                
+                var messageObj = new
+                {
+                    type = "LIKE_UPDATE",
+                    idmenu = valoracion.IdMenu,
+                    totalLikes = totalLikes
+                };
+                string jsonMessage = JsonSerializer.Serialize(messageObj);
+               
+                await _wsManager.BroadcastMessageAsync(jsonMessage);
 
                 return Ok(new
                 {
@@ -73,18 +83,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // 2. CRUD ESTÁNDAR (Arquitectura de tu proyecto .NET)
-        // =========================================================
 
-        [HttpGet]
+        [HttpGet("getall-valmenu")]
         public async Task<IActionResult> GetAll()
         {
             var valoraciones = await _valoracionService.GetAllAsync();
             return Ok(valoraciones);
         }
 
-        [HttpGet("{iduser}/{idmenu}")]
+        [HttpGet("getvalmenu-byids/{iduser}/{idmenu}")]
         public async Task<IActionResult> GetById(string iduser, int idmenu)
         {
             var valoracion = await _valoracionService.GetByIdAsync(iduser, idmenu);
@@ -93,7 +100,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(valoracion);
         }
 
-        [HttpPost]
+        [HttpPost("create-valmenu")]
         public async Task<IActionResult> Create([FromBody] ValoracionRuletaMenu valoracion)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -102,7 +109,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetById), new { iduser = created.IdUser, idmenu = created.IdMenu }, created);
         }
 
-        [HttpPut("{iduser}/{idmenu}")]
+        [HttpPut("updvalmenu-byids/{iduser}/{idmenu}")]
         public async Task<IActionResult> Update(string iduser, int idmenu, [FromBody] ValoracionRuletaMenu valoracion)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -113,7 +120,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{iduser}/{idmenu}")]
+        [HttpDelete("delvalmenu-byids/{iduser}/{idmenu}")]
         public async Task<IActionResult> Delete(string iduser, int idmenu)
         {
             var deleted = await _valoracionService.DeleteAsync(iduser, idmenu);

@@ -19,10 +19,6 @@ namespace WebApiRestGestApp.Services
             _context = context;
         }
 
-        // ==========================================
-        // MÉTODOS MIGRADOS DE NODE.JS
-        // ==========================================
-
         public async Task<int> CountLikesByMenuAsync(int idmenu)
         {
             return await _context.ValoracionRuletaMenus
@@ -52,10 +48,7 @@ namespace WebApiRestGestApp.Services
             return await CountLikesByMenuAsync(data.IdMenu);
         }
 
-        // ==========================================
-        // CRUD ESTÁNDAR
-        // ==========================================
-
+      
         public async Task<IEnumerable<ValoracionRuletaMenu>> GetAllAsync()
         {
             return await _repository.GetAllAsync();
@@ -76,8 +69,7 @@ namespace WebApiRestGestApp.Services
         {
             var existing = await GetByIdAsync(iduser, idmenu);
             if (existing == null) return false;
-
-            // Uso del mapeo dinámico para el update tradicional
+            
             UpdatePropertiesDynamically(existing, valoracion);
 
             // Aseguramos que las llaves primarias no se pierdan por seguridad
@@ -98,10 +90,7 @@ namespace WebApiRestGestApp.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-        // ==========================================
-        // MÉTODO DINÁMICO PARA EF CORE (Reflection)
-        // ==========================================
+       
         private void UpdatePropertiesDynamically(ValoracionRuletaMenu existing, ValoracionRuletaMenu incoming)
         {
             PropertyInfo[] properties = typeof(ValoracionRuletaMenu).GetProperties();

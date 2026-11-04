@@ -104,7 +104,7 @@ namespace WebApiRestGestApp.Services
             // 1. FILTRO ANTI-DUPLICADOS en memoria
             var uniquePayload = usersList
                 .GroupBy(u => u.Id)
-                .Select(g => g.Last()) // Si vienen repetidos, toma el más reciente
+                .Select(g => g.Last()) 
                 .ToList();
 
             var userIds = uniquePayload.Select(u => u.Id).ToList();
@@ -135,8 +135,7 @@ namespace WebApiRestGestApp.Services
                     results.Add(incoming);
                 }
             }
-
-            // 4. Guardar todos los cambios en 1 sola transacción
+                        
             await _context.SaveChangesAsync();
 
             return results;
@@ -150,8 +149,7 @@ namespace WebApiRestGestApp.Services
             PropertyInfo[] properties = typeof(User).GetProperties();
 
             foreach (PropertyInfo property in properties)
-            {
-                // Protegemos la llave primaria y la fecha de creación
+            {              
                 if (property.Name == nameof(User.Id) || property.Name == nameof(User.CreatedAt))
                     continue;
 
@@ -162,5 +160,41 @@ namespace WebApiRestGestApp.Services
                 property.SetValue(existing, newValue);
             }
         }
+
+        
+        public async Task<User?> UpdateExpoTokenByUsernameAsync(string username, string expoPushToken)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return null;
+
+            string cleanUsername = username.Trim().ToLower();
+
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == cleanUsername);
+
+            if (existingUser == null) return null;
+                        
+            string timeZoneId = OperatingSystem.IsWindows() ? "SA Pacific Standard Time" : "America/Lima";
+                       
+            TimeZoneInfo limaTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            DateTime horaLima = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, limaTimeZone);
+                       
+            existingUser.ExpoPushToken = expoPushToken;
+            existingUser.UpdatedAt = horaLima;
+
+            await _context.SaveChangesAsync();
+
+            return existingUser;
+        }
+
+        public async Task<User?> FindUserByNameAsync(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username)) return null;
+
+            string cleanUsername = username.Trim().ToLower();
+
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == cleanUsername);
+        }
+
     }
 }

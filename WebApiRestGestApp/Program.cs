@@ -33,6 +33,7 @@ builder.Services.AddScoped<IUserDataService, UserDataService>();
 builder.Services.AddHttpClient<IEmailService, EmailService>();
 builder.Services.AddHttpClient<IAlarmService, AlarmService>();
 builder.Services.AddScoped<IValoracionRuletaMenuService, ValoracionRuletaMenuService>();
+builder.Services.AddSingleton<IWebSocketConnectionManager, WebSocketConnectionManager>();
 
 // =====================================================================
 // COMENTAR ESTA LÍNEA PARA APAGAR EL PROCESO AUTOMÁTICO EN SEGUNDO PLANO 27082026 de envio de notificaciones
@@ -122,6 +123,13 @@ var app = builder.Build();
 
 // Agregamos la ruta base para tu servidor Apache
 app.UsePathBase("/gestapp");
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+app.UseWebSockets(webSocketOptions);
+app.UseMiddleware<WebApiRestGestApp.Middlewares.WebSocketLikesMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {

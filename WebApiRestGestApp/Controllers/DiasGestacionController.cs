@@ -9,7 +9,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/diasgestacion")]
+    //[Route("api/cenan2026/diasgestacion")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class DiasGestacionController : ControllerBase
     {
@@ -19,10 +20,7 @@ namespace WebApiRestGestApp.Controllers
         {
             _diasService = diasService;
         }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+       
         [HttpPost("syncalldaysgesta")]
         public async Task<IActionResult> SaveOrUpdT05diasGestacionSync([FromBody] IEnumerable<DiasGestacion> diasList)
         {
@@ -49,17 +47,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // CRUD ESTÁNDAR
-        // =========================================================
-        [HttpGet]
+        
+        [HttpGet("getall-diasgesta")]
         public async Task<IActionResult> GetAll()
         {
             var dias = await _diasService.GetAllAsync();
             return Ok(dias);
         }
 
-        [HttpGet("{idDiasg}/{idUser}")]
+        [HttpGet("getdiasgesta-byusernrodia/{idDiasg}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idDiasg, Guid idUser)
         {
             var dias = await _diasService.GetByIdsAsync(idDiasg, idUser);
@@ -68,7 +64,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(dias);
         }
 
-        [HttpPost]
+        [HttpPost("create-diasgesta")]
         public async Task<IActionResult> Create([FromBody] DiasGestacion dias)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -77,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idDiasg = created.IdDiasg, idUser = created.IdUser }, created);
         }
 
-        [HttpPut("{idDiasg}/{idUser}")]
+        [HttpPut("upddiasgesta-byusernrodia/{idDiasg}/{idUser}")]
         public async Task<IActionResult> Update(int idDiasg, Guid idUser, [FromBody] DiasGestacion dias)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -88,7 +84,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{idDiasg}/{idUser}")]
+        [HttpDelete("deldiasgesta-byusernrodia/{idDiasg}/{idUser}")]
         public async Task<IActionResult> Delete(int idDiasg, Guid idUser)
         {
             var deleted = await _diasService.DeleteAsync(idDiasg, idUser);

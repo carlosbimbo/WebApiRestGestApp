@@ -10,7 +10,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/usuario")]
+    //[Route("api/cenan2026/usuario")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -20,10 +21,7 @@ namespace WebApiRestGestApp.Controllers
         {
             _userService = userService;
         }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+                
         [HttpPost("syncalluser")]
         public async Task<IActionResult> SaveOrupdUserSync([FromBody] IEnumerable<User> usersList)
         {
@@ -51,17 +49,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // CRUD Y ENDPOINTS EXISTENTES
-        // =========================================================
-        [HttpGet]
+        
+        [HttpGet("getall-users")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("getuser-byid/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -69,7 +65,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(user);
         }
 
-        [HttpPost]
+        [HttpPost("create-user")]
         public async Task<IActionResult> Create([FromBody] User user)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -77,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdUser.Id }, createdUser);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("upduser-byid/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] User user)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -86,7 +82,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("deluser-byid/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _userService.DeleteUserAsync(id);
@@ -112,7 +108,7 @@ namespace WebApiRestGestApp.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("api/cenan2026/save-userexpotoken")]
+        [HttpPost("save-userexpotoken")]
         public async Task<IActionResult> SaveUserExpoToken([FromBody] SaveExpoTokenRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(new { error = "Faltan datos en la petición" });
@@ -145,5 +141,77 @@ namespace WebApiRestGestApp.Controllers
                 return StatusCode(500, new { error = exactError });
             }
         }
+
+        
+        [AllowAnonymous] // Permite el acceso sin token JWT si así estaba en Node
+        [HttpPost("save-userexpotoken-byusername")]
+        public async Task<IActionResult> SaveExpoPushTokenByUsername([FromBody] SaveExpoTokenUsernameRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Faltan datos en la petición" });
+            }
+
+            try
+            {
+                var updatedUser = await _userService.UpdateExpoTokenByUsernameAsync(request.Username, request.ExpoPushToken);
+
+                if (updatedUser == null)
+                {
+                    return BadRequest(new { error = "Usuario no encontrado o no se pudo actualizar" });
+                }
+
+                return Ok(new
+                {
+                    message = "Token actualizado correctamente por username",
+                    user = new
+                    {
+                        id = updatedUser.Id,
+                        username = updatedUser.Username,
+                        expopushtoken = updatedUser.ExpoPushToken,
+                        updated_at = updatedUser.UpdatedAt
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                var exactError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return StatusCode(400, new { error = exactError });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("signup")]
+        public async Task<IActionResult> Signup([FromBody] SignupRequest request)
+        {            
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.Username) ||
+                string.IsNullOrWhiteSpace(request.Password))
+            {
+                return StatusCode(204, new { message = "NO_CONTENT" });
+            }
+
+            try
+            {               
+                var user = await _userService.FindUserByNameAsync(request.Username);
+
+                if (user != null)
+                {                    
+                    return StatusCode(201, new { message = "SUCCESS" });
+                }
+                else
+                {                   
+                    return StatusCode(401, new { message = "INVALID_CREDENTIALS" });
+                }
+            }
+            catch (Exception ex)
+            {
+                var exactError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                Console.WriteLine(exactError);
+                return StatusCode(500, new { error = "INTERNAL_SERVER_ERROR" });
+            }
+        }
+
+
     }
 }

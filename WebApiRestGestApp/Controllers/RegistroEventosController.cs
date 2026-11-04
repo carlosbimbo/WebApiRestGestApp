@@ -9,7 +9,8 @@ using WebApiRestGestApp.Services;
 namespace WebApiRestGestApp.Controllers
 {
     [Authorize]
-    [Route("api/cenan2026/eventos")]
+    //[Route("api/cenan2026/eventos")]
+    [Route("api/cenan2026")]
     [ApiController]
     public class RegistroEventosController : ControllerBase
     {
@@ -19,10 +20,7 @@ namespace WebApiRestGestApp.Controllers
         {
             _eventoService = eventoService;
         }
-
-        // =========================================================
-        // NUEVO ENDPOINT MIGRADO DE NODE.JS
-        // =========================================================
+               
         [HttpPost("syncalleventuser")]
         public async Task<IActionResult> SaveOrupdEventUserSync([FromBody] IEnumerable<RegistroEvento> eventos)
         {
@@ -49,17 +47,15 @@ namespace WebApiRestGestApp.Controllers
             }
         }
 
-        // =========================================================
-        // CRUD ESTÁNDAR
-        // =========================================================
-        [HttpGet]
+        
+        [HttpGet("getall-eventos")]
         public async Task<IActionResult> GetAll()
         {
             var eventos = await _eventoService.GetAllEventosAsync();
             return Ok(eventos);
         }
 
-        [HttpGet("{idEven}/{idUser}")]
+        [HttpGet("geteventos-byusernroeve/{idEven}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idEven, Guid idUser)
         {
             var evento = await _eventoService.GetEventoByIdsAsync(idEven, idUser);
@@ -68,7 +64,7 @@ namespace WebApiRestGestApp.Controllers
             return Ok(evento);
         }
 
-        [HttpPost]
+        [HttpPost("create-evento")]
         public async Task<IActionResult> Create([FromBody] RegistroEvento evento)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -77,7 +73,7 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idEven = created.IdEven, idUser = created.IdUser }, created);
         }
 
-        [HttpPut("{idEven}/{idUser}")]
+        [HttpPut("updevento-byusernroeve/{idEven}/{idUser}")]
         public async Task<IActionResult> Update(int idEven, Guid idUser, [FromBody] RegistroEvento evento)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -88,7 +84,7 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{idEven}/{idUser}")]
+        [HttpDelete("delevento-byusernroeve/{idEven}/{idUser}")]
         public async Task<IActionResult> Delete(int idEven, Guid idUser)
         {
             var deleted = await _eventoService.DeleteEventoAsync(idEven, idUser);
