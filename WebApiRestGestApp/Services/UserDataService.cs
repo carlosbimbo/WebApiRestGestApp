@@ -34,6 +34,7 @@ namespace WebApiRestGestApp.Services
         private async Task<object> BuildUserDataResponseAsync(Models.User user)
         {
             var userId = user.Id;
+            var userIdString = user.Id.ToString();
 
             var etapas = await _context.EtapasGestacionales.Where(e => e.Id == userId).ToListAsync();
             var eventos = await _context.RegistroEventos.Where(e => e.IdUser == userId).ToListAsync();
@@ -41,6 +42,7 @@ namespace WebApiRestGestApp.Services
             var suplementos = await _context.RegistroSuplementos.Where(s => s.IdUser == userId).ToListAsync();
             var agendas = await _context.AgendasGestacionales.Where(a => a.Id == userId).ToListAsync();
             var dias = await _context.DiasGestaciones.Where(d => d.IdUser == userId).ToListAsync();
+            var valormenus = await _context.ValoracionRuletaMenus.Where(d => d.IdUser == userIdString).ToListAsync();
 
             return new Dictionary<string, object>
             {
@@ -81,6 +83,11 @@ namespace WebApiRestGestApp.Services
                         {
                             diasGestacion = dias,
                             _cantidad = dias.Count
+                        },
+                        t_05_valoracion_ruleta_menu = new
+                        {
+                            valoracionMenu = valormenus,
+                            _cantidad = valormenus.Count
                         }
                     }
                 }

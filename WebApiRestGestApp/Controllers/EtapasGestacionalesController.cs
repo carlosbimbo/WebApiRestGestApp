@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
 
 namespace WebApiRestGestApp.Controllers
 {
-    [Authorize] 
+    [Authorize]
     [Route("api/cenan2026/etapaestacional")]
     [ApiController]
     public class EtapasGestacionalesController : ControllerBase
@@ -19,6 +20,38 @@ namespace WebApiRestGestApp.Controllers
             _etapaService = etapaService;
         }
 
+        // =========================================================
+        // NUEVO ENDPOINT MIGRADO DE NODE.JS
+        // =========================================================
+        [HttpPost("saveorudparragesta")]
+        public async Task<IActionResult> SaveOrupdT05etapagestaArray([FromBody] IEnumerable<EtapaGestacional> etapas)
+        {
+            try
+            {
+                if (etapas == null)
+                {
+                    return BadRequest(new { error = "El payload no puede estar vacío" });
+                }
+
+                var result = await _etapaService.SaveOrUpdEtapaGestaArrayAsync(etapas);
+
+                return Ok(new
+                {
+                    status = "OK",
+                    message = "Success",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { error = "Internal Server Error" });
+            }
+        }
+
+        // =========================================================
+        // CRUD ESTÁNDAR
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

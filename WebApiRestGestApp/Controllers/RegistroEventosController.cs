@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
@@ -19,6 +20,38 @@ namespace WebApiRestGestApp.Controllers
             _eventoService = eventoService;
         }
 
+        // =========================================================
+        // NUEVO ENDPOINT MIGRADO DE NODE.JS
+        // =========================================================
+        [HttpPost("syncalleventuser")]
+        public async Task<IActionResult> SaveOrupdEventUserSync([FromBody] IEnumerable<RegistroEvento> eventos)
+        {
+            try
+            {
+                if (eventos == null)
+                {
+                    return BadRequest(new { error = "El payload no puede estar vacío" });
+                }
+
+                var result = await _eventoService.SaveOrUpdEventUserSyncAsync(eventos);
+
+                return Ok(new
+                {
+                    status = "OK",
+                    message = "Success",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { error = "Internal Server Error" });
+            }
+        }
+
+        // =========================================================
+        // CRUD ESTÁNDAR
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

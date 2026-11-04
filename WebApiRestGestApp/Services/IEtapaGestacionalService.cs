@@ -11,6 +11,7 @@ namespace WebApiRestGestApp.Services
         Task<EtapaGestacional?> GetByIdAsync(Guid id);
         Task<EtapaGestacional> CreateAsync(EtapaGestacional etapa);
         Task<bool> UpdateAsync(Guid id, EtapaGestacional etapa);
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(Guid id);     
+        Task<IEnumerable<EtapaGestacional>> SaveOrUpdEtapaGestaArrayAsync(IEnumerable<EtapaGestacional> etapas);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Repositories;
@@ -35,11 +36,14 @@ namespace WebApiRestGestApp.Services
             var existing = await _repository.GetByIdAsync(idh, idUser);
             if (existing == null) return false;
 
-            // Aseguramos que las llaves primarias se mantengan intactas
-            hemoglobina.Idh = idh;
-            hemoglobina.IdUser = idUser;
+            // Usamos el método dinámico para actualizar
+            UpdatePropertiesDynamically(existing, hemoglobina);
 
-            await _repository.UpdateAsync(hemoglobina);
+            // Aseguramos que las llaves primarias se mantengan intactas
+            existing.Idh = idh;
+            existing.IdUser = idUser;
+
+            await _repository.UpdateAsync(existing);
             return true;
         }
 
@@ -48,8 +52,61 @@ namespace WebApiRestGestApp.Services
             var existing = await _repository.GetByIdAsync(idh, idUser);
             if (existing == null) return false;
 
-            await _repository.DeleteAsync(idh, idUser);
+            await _repository.DeleteAsync(idh, idUser); // O pasa la entidad si tu repo lo requiere
             return true;
+        }
+
+        // ==========================================
+        // NUEVO: Método migrado de Node.js (syncallregishemo)
+        // ==========================================
+        public async Task<IEnumerable<RegistroHemoglobina>> SaveOrUpdRegisHemoSyncAsync(IEnumerable<RegistroHemoglobina> hemoglobinas)
+        {
+            var results = new List<RegistroHemoglobina>();
+
+            foreach (var incoming in hemoglobinas)
+            {
+                // Busca por llave primaria compuesta
+                var existing = await _repository.GetByIdAsync(incoming.Idh, incoming.IdUser);
+
+                if (existing != null)
+                {
+                    // Si existe, actualiza dinámicamente
+                    UpdatePropertiesDynamically(existing, incoming);
+                    await _repository.UpdateAsync(existing);
+                    results.Add(existing);
+                }
+                else
+                {
+                    // Si no existe, lo crea
+                    var created = await _repository.AddAsync(incoming);
+                    results.Add(created);
+                }
+            }
+
+            return results;
+        }
+
+        // ==========================================
+        // MÉTODO DINÁMICO PARA EF CORE (Reflection)
+        // ==========================================
+        private void UpdatePropertiesDynamically(RegistroHemoglobina existing, RegistroHemoglobina incoming)
+        {
+            PropertyInfo[] properties = typeof(RegistroHemoglobina).GetProperties();
+
+            foreach (PropertyInfo property in properties)
+            {
+                // Protegemos las llaves primarias compuestas
+                if (property.Name == nameof(RegistroHemoglobina.Idh) ||
+                    property.Name == nameof(RegistroHemoglobina.IdUser))
+                    continue;
+
+                // Evitar sobreescribir propiedades de navegación
+                if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
+                    continue;
+
+                var newValue = property.GetValue(incoming);
+                property.SetValue(existing, newValue);
+            }
         }
     }
 }

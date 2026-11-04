@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
@@ -19,6 +20,38 @@ namespace WebApiRestGestApp.Controllers
             _diasService = diasService;
         }
 
+        // =========================================================
+        // NUEVO ENDPOINT MIGRADO DE NODE.JS
+        // =========================================================
+        [HttpPost("syncalldaysgesta")]
+        public async Task<IActionResult> SaveOrUpdT05diasGestacionSync([FromBody] IEnumerable<DiasGestacion> diasList)
+        {
+            try
+            {
+                if (diasList == null)
+                {
+                    return BadRequest(new { error = "El payload no puede estar vacío" });
+                }
+
+                var result = await _diasService.SaveOrUpdT05diasGestacionSyncAsync(diasList);
+
+                return Ok(new
+                {
+                    status = "OK",
+                    message = "Success",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { error = "Internal Server Error" });
+            }
+        }
+
+        // =========================================================
+        // CRUD ESTÁNDAR
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,7 +59,6 @@ namespace WebApiRestGestApp.Controllers
             return Ok(dias);
         }
 
-        // GET: api/DiasGestacion/{idDiasg}/{idUser}
         [HttpGet("{idDiasg}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idDiasg, Guid idUser)
         {
@@ -45,7 +77,6 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idDiasg = created.IdDiasg, idUser = created.IdUser }, created);
         }
 
-        // PUT: api/DiasGestacion/{idDiasg}/{idUser}
         [HttpPut("{idDiasg}/{idUser}")]
         public async Task<IActionResult> Update(int idDiasg, Guid idUser, [FromBody] DiasGestacion dias)
         {
@@ -57,7 +88,6 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        // DELETE: api/DiasGestacion/{idDiasg}/{idUser}
         [HttpDelete("{idDiasg}/{idUser}")]
         public async Task<IActionResult> Delete(int idDiasg, Guid idUser)
         {

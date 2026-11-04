@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
@@ -19,6 +20,40 @@ namespace WebApiRestGestApp.Controllers
             _suplementoService = suplementoService;
         }
 
+        // =========================================================
+        // NUEVO ENDPOINT MIGRADO DE NODE.JS
+        // =========================================================
+
+        [HttpPost("syncallsuple")]
+        public async Task<IActionResult> SaveOrupdSupleSync([FromBody] IEnumerable<RegistroSuplemento> suplementos)
+        {
+            try
+            {
+                if (suplementos == null)
+                {
+                    return BadRequest(new { error = "El payload no puede estar vacío" });
+                }
+
+                var result = await _suplementoService.SaveOrUpdSupleSyncAsync(suplementos);
+
+                return Ok(new
+                {
+                    status = "OK",
+                    message = "Sincronización completada con éxito",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { error = "Internal Server Error" });
+            }
+        }
+
+        // =========================================================
+        // CRUD ESTÁNDAR
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,7 +61,6 @@ namespace WebApiRestGestApp.Controllers
             return Ok(suplementos);
         }
 
-        // GET: api/RegistroSuplementos/{idSuple}/{idUser}
         [HttpGet("{idSuple}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idSuple, Guid idUser)
         {
@@ -45,7 +79,6 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idSuple = created.IdSuple, idUser = created.IdUser }, created);
         }
 
-        // PUT: api/RegistroSuplementos/{idSuple}/{idUser}
         [HttpPut("{idSuple}/{idUser}")]
         public async Task<IActionResult> Update(int idSuple, Guid idUser, [FromBody] RegistroSuplemento suplemento)
         {
@@ -57,7 +90,6 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        // DELETE: api/RegistroSuplementos/{idSuple}/{idUser}
         [HttpDelete("{idSuple}/{idUser}")]
         public async Task<IActionResult> Delete(int idSuple, Guid idUser)
         {

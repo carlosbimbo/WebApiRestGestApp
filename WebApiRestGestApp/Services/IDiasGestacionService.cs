@@ -12,5 +12,7 @@ namespace WebApiRestGestApp.Services
         Task<DiasGestacion> CreateAsync(DiasGestacion dias);
         Task<bool> UpdateAsync(int idDiasg, Guid idUser, DiasGestacion dias);
         Task<bool> DeleteAsync(int idDiasg, Guid idUser);
+      
+        Task<IEnumerable<DiasGestacion>> SaveOrUpdT05diasGestacionSyncAsync(IEnumerable<DiasGestacion> diasList);
     }
 }

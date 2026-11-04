@@ -12,5 +12,8 @@ namespace WebApiRestGestApp.Services
         Task<RegistroHemoglobina> CreateAsync(RegistroHemoglobina hemoglobina);
         Task<bool> UpdateAsync(int idh, Guid idUser, RegistroHemoglobina hemoglobina);
         Task<bool> DeleteAsync(int idh, Guid idUser);
+
+        // NUEVO: Método migrado de Node.js para procesar array (Sincronización)
+        Task<IEnumerable<RegistroHemoglobina>> SaveOrUpdRegisHemoSyncAsync(IEnumerable<RegistroHemoglobina> hemoglobinas);
     }
 }

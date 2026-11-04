@@ -12,5 +12,8 @@ namespace WebApiRestGestApp.Services
         Task<AgendaGestacional> CreateAsync(AgendaGestacional agenda);
         Task<bool> UpdateAsync(Guid id, int nrosem, AgendaGestacional agenda);
         Task<bool> DeleteAsync(Guid id, int nrosem);
+
+        // NUEVO: Método para sincronización masiva y dinámica
+        Task<IEnumerable<AgendaGestacional>> SaveOrUpdAgendaGestacionalSyncAsync(IEnumerable<AgendaGestacional> agendaList);
     }
 }

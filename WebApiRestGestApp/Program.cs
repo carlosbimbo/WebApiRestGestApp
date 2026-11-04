@@ -8,6 +8,7 @@ using System.Linq; // Necesario para leer las cabeceras
 using WebApiRestGestApp.Data;
 using WebApiRestGestApp.Repositories;
 using WebApiRestGestApp.Services;
+using WebApiRestGestApp.Converters;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -29,8 +30,14 @@ builder.Services.AddScoped<IRegistroHemoglobinaService, RegistroHemoglobinaServi
 builder.Services.AddScoped<IDiasGestacionService, DiasGestacionService>();
 builder.Services.AddScoped<IAgendaGestacionalService, AgendaGestacionalService>();
 builder.Services.AddScoped<IUserDataService, UserDataService>();
-// Registrar HttpClient y el nuevo servicio de correo electrónico
 builder.Services.AddHttpClient<IEmailService, EmailService>();
+builder.Services.AddHttpClient<IAlarmService, AlarmService>();
+builder.Services.AddScoped<IValoracionRuletaMenuService, ValoracionRuletaMenuService>();
+
+// =====================================================================
+// COMENTAR ESTA LÍNEA PARA APAGAR EL PROCESO AUTOMÁTICO EN SEGUNDO PLANO 27082026 de envio de notificaciones
+// =====================================================================
+builder.Services.AddHostedService<WebApiRestGestApp.BackgroundServices.AlarmBackgroundService>();
 
 // NUEVO: Configurar CORS para permitir que cualquier aplicación o frontend se conecte sin bloqueos
 builder.Services.AddCors(options =>
@@ -72,7 +79,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{    
+    options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+
+    // Aplica el convertidor dinámico para transformar los "" en null
+    options.JsonSerializerOptions.Converters.Add(new DynamicNullableConverterFactory());
+}); 
 builder.Services.AddEndpointsApiExplorer();
 
 // 4. Configurar Swagger 

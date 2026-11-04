@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiRestGestApp.Models;
 using WebApiRestGestApp.Services;
 
 namespace WebApiRestGestApp.Controllers
 {
-    [Authorize] // Protegido con JWT
+    [Authorize]
     [Route("api/cenan2026/registrohemoglobina")]
     [ApiController]
     public class RegistroHemoglobinasController : ControllerBase
@@ -19,6 +20,38 @@ namespace WebApiRestGestApp.Controllers
             _hemoglobinaService = hemoglobinaService;
         }
 
+        // =========================================================
+        // NUEVO ENDPOINT MIGRADO DE NODE.JS
+        // =========================================================
+        [HttpPost("syncallregishemo")]
+        public async Task<IActionResult> SaveOrupdRegisHemoSync([FromBody] IEnumerable<RegistroHemoglobina> hemoglobinas)
+        {
+            try
+            {
+                if (hemoglobinas == null)
+                {
+                    return BadRequest(new { error = "El payload no puede estar vacío" });
+                }
+
+                var result = await _hemoglobinaService.SaveOrUpdRegisHemoSyncAsync(hemoglobinas);
+
+                return Ok(new
+                {
+                    status = "OK",
+                    message = "Success",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { error = "Internal Server Error" });
+            }
+        }
+
+        // =========================================================
+        // CRUD ESTÁNDAR
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,7 +59,6 @@ namespace WebApiRestGestApp.Controllers
             return Ok(hemoglobinas);
         }
 
-        // GET: api/RegistroHemoglobinas/{idh}/{idUser}
         [HttpGet("{idh}/{idUser}")]
         public async Task<IActionResult> GetByIds(int idh, Guid idUser)
         {
@@ -45,7 +77,6 @@ namespace WebApiRestGestApp.Controllers
             return CreatedAtAction(nameof(GetByIds), new { idh = created.Idh, idUser = created.IdUser }, created);
         }
 
-        // PUT: api/RegistroHemoglobinas/{idh}/{idUser}
         [HttpPut("{idh}/{idUser}")]
         public async Task<IActionResult> Update(int idh, Guid idUser, [FromBody] RegistroHemoglobina hemoglobina)
         {
@@ -57,7 +88,6 @@ namespace WebApiRestGestApp.Controllers
             return NoContent();
         }
 
-        // DELETE: api/RegistroHemoglobinas/{idh}/{idUser}
         [HttpDelete("{idh}/{idUser}")]
         public async Task<IActionResult> Delete(int idh, Guid idUser)
         {

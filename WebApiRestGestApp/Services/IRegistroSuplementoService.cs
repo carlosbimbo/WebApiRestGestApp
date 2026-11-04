@@ -12,5 +12,8 @@ namespace WebApiRestGestApp.Services
         Task<RegistroSuplemento> CreateAsync(RegistroSuplemento suplemento);
         Task<bool> UpdateAsync(int idSuple, Guid idUser, RegistroSuplemento suplemento);
         Task<bool> DeleteAsync(int idSuple, Guid idUser);
+
+        // NUEVO: Método migrado de Node.js
+        Task<IEnumerable<RegistroSuplemento>> SaveOrUpdSupleSyncAsync(IEnumerable<RegistroSuplemento> suplementos);
     }
 }

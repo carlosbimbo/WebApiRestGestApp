@@ -12,5 +12,7 @@ namespace WebApiRestGestApp.Services
         Task<RegistroEvento> CreateEventoAsync(RegistroEvento evento);
         Task<bool> UpdateEventoAsync(int idEven, Guid idUser, RegistroEvento evento);
         Task<bool> DeleteEventoAsync(int idEven, Guid idUser);
+        
+        Task<IEnumerable<RegistroEvento>> SaveOrUpdEventUserSyncAsync(IEnumerable<RegistroEvento> eventos);
     }
 }
