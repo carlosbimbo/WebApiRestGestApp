@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿//UserDataService.cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,12 +11,14 @@ namespace WebApiRestGestApp.Services
     public class UserDataService : IUserDataService
     {
         private readonly AppDbContext _context;
-
-        public UserDataService(AppDbContext context)
+        private readonly IConfiguration _configuration; 
+                
+        public UserDataService(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
-                
+
         public async Task<object?> GetAllDataUserAsync(string username)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
@@ -22,7 +26,7 @@ namespace WebApiRestGestApp.Services
 
             return await BuildUserDataResponseAsync(user);
         }
-                
+
         public async Task<object?> GetAllDataUserByEmailAsync(string email)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
@@ -30,7 +34,7 @@ namespace WebApiRestGestApp.Services
 
             return await BuildUserDataResponseAsync(user);
         }
-                
+
         private async Task<object> BuildUserDataResponseAsync(Models.User user)
         {
             var userId = user.Id;
@@ -94,25 +98,32 @@ namespace WebApiRestGestApp.Services
             };
         }
 
-        
+
         public async Task<object?> GetFotosPorUsuarioAsync(string username)
         {
             // 1. Buscamos al usuario por su username
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
-            // Si el usuario no existe, retornamos null para que el controlador lance el error
+            // Si el usuario no existe, retornamos null
             if (user == null) return null;
 
-            // 2. Buscamos en la tabla de suplementos usando el Id del usuario encontrado
-            var fotosList = await _context.RegistroSuplementos
+            // NUEVO: Obtenemos la ruta pública desde appsettings.json
+            var rutaPublica = _configuration["RutaPublic:ArchivoPath"];
+
+            // 2. Buscamos en la tabla de suplementos
+            // Para evitar problemas de traducción de Entity Framework con variables locales,
+            // primero traemos los datos de la BD y luego armamos la URL en memoria.
+            var fotosData = await _context.RegistroSuplementos
                 .Where(s => s.IdUser == user.Id && !string.IsNullOrEmpty(s.Foto))
-                .Select(s => new
-                {
-                    foto = s.Foto,
-                    // Concatenamos la ruta base con el nombre de la foto
-                    url = $"https://www.macrocorpsystem.com/cenan2025/fotoscapture/{s.Foto}"
-                })
+                .Select(s => s.Foto)
                 .ToListAsync();
+
+            var fotosList = fotosData.Select(fotoNombre => new
+            {
+                foto = fotoNombre,
+                // Concatenamos la ruta base leída del appsettings con el nombre de la foto
+                url = $"{rutaPublica}{fotoNombre}"
+            }).ToList();
 
             // 3. Retornamos el objeto encapsulado en la propiedad "fotos"
             return new { fotos = fotosList };

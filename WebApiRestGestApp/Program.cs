@@ -9,6 +9,8 @@ using WebApiRestGestApp.Data;
 using WebApiRestGestApp.Repositories;
 using WebApiRestGestApp.Services;
 using WebApiRestGestApp.Converters;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -123,6 +125,27 @@ var app = builder.Build();
 
 // Agregamos la ruta base para tu servidor Apache
 app.UsePathBase("/gestapp");
+
+// =====================================================================
+// NUEVO: Configuración dinámica de directorio virtual para las fotos
+// =====================================================================
+var fotosPath = builder.Configuration["Uploads:FotosPath"];
+
+if (!string.IsNullOrEmpty(fotosPath))
+{
+    // Verifica si la carpeta física existe, si no, la crea para que no falle la app
+    if (!Directory.Exists(fotosPath))
+    {
+        Directory.CreateDirectory(fotosPath);
+    }
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(fotosPath),
+        RequestPath = "/fotoscapture" // El segmento de URL público (ej. /gestapp/api/cenan2026/fotoscapture/...)
+    });
+}
+// =====================================================================
 
 var webSocketOptions = new WebSocketOptions
 {
